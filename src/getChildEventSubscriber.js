@@ -54,6 +54,7 @@ export default function getChildEventSubscriber(addListener, key) {
   // event will cause onFocus+willFocus events because we had previously been
   // considered blurred
   let lastEmittedEvent = 'didBlur';
+  let isMounted = false;
 
   const upstreamEvents = [
     'willFocus',
@@ -91,8 +92,10 @@ export default function getChildEventSubscriber(addListener, key) {
       if (lastEmittedEvent === 'didBlur') {
         // The child is currently blurred. Look for willFocus conditions
         if (eventName === 'willFocus' && isChildFocused) {
+          isMounted = true;
           emit((lastEmittedEvent = 'willFocus'), childPayload);
         } else if (eventName === 'action' && isChildFocused) {
+          isMounted = true;
           emit((lastEmittedEvent = 'willFocus'), childPayload);
         }
       }
@@ -139,7 +142,7 @@ export default function getChildEventSubscriber(addListener, key) {
         }
       }
 
-      if (lastEmittedEvent === 'didBlur' && !newRoute) {
+      if (lastEmittedEvent === 'didBlur' && isMounted && !newRoute) {
         removeAll();
       }
     })
